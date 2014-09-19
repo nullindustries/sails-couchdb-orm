@@ -32,10 +32,16 @@ function likeValue(options) {
   var endKey = [];
   Object.keys(options).sort().forEach(function(key) {
     var value = options[key];
-    if ('string' != typeof value) throw new Error('like value must be a string');
-    if (value.charAt(value.length - 1) == '%') value = value.substring(0, value.length - 1);
-    startKey.push(value);
-    endKey.push(value + '\ufff0');
+    if ('string' == typeof value) {
+       //throw new Error('like value must be a string');
+       if (value.charAt(value.length - 1) == '%') value = value.substring(0, value.length - 1);
+       startKey.push(value);
+       endKey.push(value + '\ufff0');
+    }else {
+      if (value.startKey) startKey.push(value.startKey);
+      if (value.endKey) endKey.push(value.endKey);
+      if (value.startKey == undefined && value.endKey == undefined) throw new Error('like value must be a string or objec with startKey, endKey');
+    }
   });
 
   return {
