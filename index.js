@@ -202,7 +202,7 @@ adapter.teardown = function teardown(connection, cb) {
  */
 adapter.describe = function describe(connection, collectionName, cb) {
   var collection = registry.collection(collectionName);
-  if (! collection) 
+  if (! collection)
     return cb(new Error('no such collection'));
 
   return cb(null, collection.definition);
@@ -390,16 +390,18 @@ adapter.update = function update(connectionName, collectionName, options, values
  * @return {[type]}                  [description]
  */
 adapter.destroy = function destroy(connectionName, collectionName, options, cb) {
+	// Find the record
   var db = registry.db(collectionName);
-
-  // Find the record
-  adapter.find(connectionName,collectionName,options, function(err,docs) {
-    async.each(docs,function(item) { // Shoud have only one.
-      db.destroy(item.id, item.rev, function(err, doc) {
-        cb(err,[doc]); // Waterline expects an array as result.
-      });
-    });
-  });
+	adapter.find(connectionName,collectionName,options, function(err,docs) {
+            var res = [];
+		async.each(docs,function(item,localCb) {
+			db.destroy(item.id,item.rev, function(err, bdy){
+                            if (err) localCb(err);
+                            res.push(bdy);
+                            localCb();
+                        });
+		},function(e){cb(e, res)});
+	});
 };
 
 
@@ -617,4 +619,3 @@ function docForIngestion(doc) {
 
   return doc;
 }
-
