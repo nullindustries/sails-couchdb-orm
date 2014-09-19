@@ -263,7 +263,21 @@ function find(connectionName, collectionName, options, cb, round) {
 		//console.log("Queried Attributes doesn't contain any values");
     /// All docs
     dbOptions.include_docs = true;
-    db.list(dbOptions, listReplied);
+    //db.list(dbOptions, listReplied);
+    // TODO: fix this shit!
+    var where = {
+      like: {
+        //createAt: (new Date(1980,0,1)).toISOString()
+        createdAt: {
+          startKey: (new Date(1980,0,1)).toISOString(),
+          endKey: (new Date(2300,0,1)).toISOString()
+        }
+      }
+    };
+    options.where = where
+    var viewName = views.name(where);
+    dbOptions.key = views.value(where);
+    db.view('views', viewName, dbOptions, viewResult);
   } else if (queriedAttributes.length == 1 && (queriedAttributes[0] == 'id' || queriedAttributes[0] == '_id')) {
 		var id = options.where.id || options.where._id;
 
